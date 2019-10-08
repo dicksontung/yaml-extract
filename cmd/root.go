@@ -32,7 +32,7 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "yaml-extract",
 	Short: "Extract value from a yaml file into another yaml file",
-	Long:  `Extract value from a yaml file into another yaml file`,
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		keyConfig := viper.New()
 		keyConfig.SetConfigFile(cmd.Flag("keys").Value.String())
@@ -53,8 +53,12 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
-		if err := ioutil.WriteFile(cmd.Flag("output").Value.String(), outB, 0644); err != nil {
-			panic(err)
+		if cmd.Flag("output").Changed {
+			if err := ioutil.WriteFile(cmd.Flag("output").Value.String(), outB, 0644); err != nil {
+				panic(err)
+			}
+		} else {
+			fmt.Printf("%s", outB)
 		}
 	},
 }
@@ -70,10 +74,11 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	rootCmd.Flags().StringP("input", "i", "./input.yaml", "input yaml file")
-	rootCmd.Flags().StringP("output", "o", "./output.yaml", "output yaml file")
-	rootCmd.Flags().StringP("keys", "k", "./keys.yaml", "keys to be extracted")
+	rootCmd.Flags().StringP("input", "i", "", "input yaml file")
+	rootCmd.MarkFlagRequired("input")
+	rootCmd.Flags().StringP("output", "o", "", "output yaml file")
+	rootCmd.Flags().StringP("keys", "k", "", "keys to be extracted")
+	rootCmd.MarkFlagRequired("keys")
 }
 
 // initConfig reads in config file and ENV variables if set.
