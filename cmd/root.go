@@ -17,13 +17,14 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 
+	"github.com/adam-hanna/arrayOperations"
+	"github.com/dicksontung/viper"
 	"github.com/mitchellh/go-homedir"
-	"github.com/spf13/viper"
 )
 
 var cfgFile string
@@ -45,11 +46,12 @@ var rootCmd = &cobra.Command{
 		if err := input.ReadInConfig(); err != nil {
 			panic(err)
 		}
-		outM := make(map[string]interface{})
-		for _, key := range keys {
-			outM[key] = input.Get(key)
+		difference, _ := arrayOperations.Difference(keys, input.AllKeys())
+		diff := difference.Interface().([]string)
+		for _, unwantedKey := range diff {
+			input.Unset(unwantedKey)
 		}
-		outB, err := yaml.Marshal(&outM)
+		outB, err := yaml.Marshal(input.AllSettings())
 		if err != nil {
 			panic(err)
 		}
