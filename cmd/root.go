@@ -51,7 +51,9 @@ var rootCmd = &cobra.Command{
 		for _, unwantedKey := range diff {
 			input.Unset(unwantedKey)
 		}
-		outB, err := yaml.Marshal(input.AllSettings())
+		configmap := input.AllSettings()
+		delete(configmap, "")
+		outB, err := yaml.Marshal(configmap)
 		if err != nil {
 			panic(err)
 		}
